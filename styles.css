@@ -1,0 +1,244 @@
+:root{
+  --bg:#fff; --constructor-bg:#eae9ee; --unaccented-bg:#f8f8f8; --border:#eaeaea;
+  --text:#000; --label:#656c87; --icon:#333; --icon-sec:#656c87;
+  --pale:#3333330d; --pale-active:#33333326; --success:#12a12c; --info-border:#7b62f8;
+  --info-bg:#eeebff; --info-bg-active:#d4ccff; --hover-orange:#db4200; --sep:#00000014;
+  --r-s:8px; --r-btn:100px;
+  --o-3xs:2px; --o-2xs:4px; --o-xs:6px; --o-s:8px; --o-st:10px; --o-m:12px; --o-xl:20px; --o-2xl:24px;
+  --shadow-c:0 0 4px #0000000f; --shadow-d:0 0 3px #0000001a;
+  font-family:Inter,system-ui,sans-serif; font-size:14px; letter-spacing:-.1974px;
+}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%;background:#fff;overflow:hidden}
+button{font:inherit;border:0;background:none;cursor:pointer;color:inherit}
+/* Сцена 1600x900: позицию и масштаб под окно задаёт demo-frame (панель сценариев справа) */
+.stage{position:absolute;left:0;top:0;width:1600px;height:900px;overflow:hidden;border-radius:var(--r-s);background:var(--constructor-bg)}
+#app{position:relative;width:1600px;height:900px;background:var(--constructor-bg)}
+.topbar{height:44px;display:flex;align-items:center;justify-content:space-between}
+.topbar__title{flex:1;padding-left:var(--o-xl)}
+.tumbler{display:flex;gap:2px;background:var(--pale);border-radius:var(--r-btn);padding:2px;height:24px}
+.tumbler__item{padding:0 var(--o-m);display:flex;align-items:center;border-radius:var(--r-btn);color:var(--label);font-size:12px}
+.tumbler__item.is-active{background:#fff;color:#000}
+.topbar__cmds{flex:1;display:flex;justify-content:flex-end;align-items:center;gap:var(--o-xs);padding-right:var(--o-st)}
+.sep{width:1px;height:24px;background:var(--sep);margin:0 var(--o-xs)}
+.btn-gpt.is-open{box-shadow:0 0 0 2px var(--info-bg-active)}
+.btn-icon{width:32px;height:32px;border-radius:var(--r-btn);color:var(--icon-sec);font-size:18px}
+.btn-icon:hover{background:var(--pale)} .btn-icon.is-disabled{color:#ccc}
+.btn-icon.is-disabled:hover{background:none;cursor:default}
+.zoom{color:var(--label);padding:0 var(--o-2xs);display:flex;align-items:center;gap:var(--o-xs)}
+.btn-done{width:32px;height:32px;border-radius:var(--r-btn);background:var(--success);color:#fff;box-shadow:var(--shadow-d);margin-left:var(--o-s)}
+/* Кнопка закрытия — из проекта Маши (.env-close) */
+.btn-close{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:var(--r-btn);background:rgba(51,51,51,.05);color:#656c87}
+.btn-close:hover{background:rgba(51,51,51,.1);color:#1e5391}
+.body{display:flex;height:856px}
+.screens{flex:1;display:flex;justify-content:center;padding:0 var(--o-m)}
+.dashboard{flex:1;max-width:1440px;background:var(--unaccented-bg);border:1px solid var(--border);
+  border-radius:var(--r-s) var(--r-s) 0 0;padding:var(--o-s) var(--o-s) 0;display:flex;gap:var(--o-s);position:relative;overflow:hidden}
+.dash-grid{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px;overflow-y:auto;overflow-x:hidden;padding:1px;margin:-1px;scrollbar-width:thin;scrollbar-color:#00000026 transparent}
+.dash-inserted{display:flex;flex-direction:column;gap:6px;flex:none}
+.dash-inserted:empty{display:none}
+.dash-inserted{gap:6px}
+/* ряд результата: свои ячейки и своя сетка, к ховеру виджетов основного дашборда отношения не имеет */
+.rgroup{display:flex;flex-direction:column;gap:6px;flex:none}
+.rrow{position:relative;width:100%;flex:none}
+.rrow .rcell{position:absolute;width:auto;border-radius:var(--r-s);box-shadow:var(--shadow-c);background-repeat:no-repeat}
+.rrow:has(.wcell:hover) .dash-lines{opacity:1}
+.dash-existing{height:386px;border-radius:var(--r-s);background:#fff var(--dash-img,none) center/cover;box-shadow:var(--shadow-c);
+  display:grid;place-items:center;color:var(--label)}
+.dash-existing:empty::after{content:"Положи экспорт дашборда в assets/dashboard.png";font-size:13px}
+.dash-notify{width:250px;flex:none;display:flex;flex-direction:column;gap:6px;align-self:flex-start}
+
+/* Окно SabyGPT (Figma 270:5288), элементы списка (11:373), попап выбора модели (19:15110) */
+.gpt-scrim{position:absolute;inset:0;z-index:10;display:flex;align-items:flex-start;justify-content:center;background:var(--background-contrast-pale_color,#3333330d);border-radius:inherit}
+.gpt-scrim[hidden]{display:none}
+.gpt{position:relative;width:550px;margin-top:0;transition:width .2s ease,margin-top .25s ease;max-height:calc(100% - 48px);display:flex;flex-direction:column;padding:0 var(--o-m) var(--o-m);border-radius:12px;
+  background:var(--components-constructor-simplifiedconstructor_background-color,#eceaf5);
+  box-shadow:0 0 46px #0000001f,0 0 15px #0000001f}
+.gpt__header{display:flex;align-items:center;justify-content:space-between;padding:var(--o-xs) 0;flex:none}
+.gpt__headR{display:flex;align-items:center;gap:12px}
+.gpt--wide{width:960px;height:676px}
+.gpt--wide .gpt__sub{flex:1;min-height:0}
+.gpt--wide .gen{margin:auto;padding-top:0}
+.gpt__headL{display:flex;align-items:center;gap:12px}
+.gpt__variants{display:flex;align-items:center;gap:12px}
+.gpt__arrows{display:flex;align-items:center;gap:6px}
+.gpt__arrow{display:flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:var(--r-btn);background:var(--background-contrast-pale_color,#3333330d);color:var(--text-label_contrast_text-color,#656c87);cursor:pointer}
+.gpt__arrow:hover:not(:disabled){background:#3333331a}
+.gpt__arrow--next svg{transform:rotate(180deg)}
+.gpt__arrow:disabled{background:none;box-shadow:inset 0 0 0 1px var(--border-readonly_border-color,#e4e4e4);color:#c3c7d3;cursor:default}
+.gpt__count{font-size:15px;letter-spacing:-.2115px;color:var(--text-label_contrast_text-color,#656c87);white-space:nowrap}
+.gpt__variants[hidden]{display:none}
+.gpt__model{display:flex;align-items:center;height:26px;padding:2px 0 0;color:var(--text-label_text-color,#8991a9);font-size:14px;cursor:pointer}
+/* кнопка в шапке — link/label из каталога ui-kit: ховер и пресс — токены label_hover (#313e78), текст подчёркнут */
+.gpt__model:hover,.gpt__model:active,.gpt__model.is-open{color:var(--text-label_hover_text-color,#313e78)}
+.gpt__model:hover .ic,.gpt__model:active .ic,.gpt__model.is-open .ic{color:var(--icon-label_hover_icon-color,#313e78)}
+.gpt__model:hover span,.gpt__model:active span,.gpt__model.is-open span{text-decoration:underline;text-underline-offset:2px}
+.gpt__model .ic{margin-right:4px;display:flex;align-items:center;justify-content:center;width:16px;height:16px;padding-bottom:1px}
+.gpt__icon{display:flex;align-items:center;justify-content:center;width:32px;height:32px;margin:0 -4px;flex:none;border-radius:var(--r-btn);color:var(--icon-secondary_icon-color,#656c87);cursor:pointer}
+.gpt__icon:hover{color:var(--icon-secondary_hover_icon-color,#1e5391)}
+.gpt__icon[hidden],.gpt__launch[hidden],.gpt__tool[hidden]{display:none}
+.gpt__body{background:#fff;border-radius:var(--r-s);padding:var(--o-s) 0;overflow:auto;min-height:0}
+/* Элемент списка (11:373): статика / ховер с кнопками справа */
+.pitem{display:flex;align-items:center;justify-content:space-between;height:31px;padding:4px 6px 3px 12px;cursor:pointer;font-size:14px;color:#000}
+.pitem:hover{background:var(--background-hover_background-color,#f3f4f8)}
+.pitem__t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pitem__acts{display:flex;align-items:center;gap:12px;opacity:0;flex:none}
+.pitem:hover .pitem__acts{opacity:1}
+.pitem__b{display:flex;align-items:center;justify-content:center;width:24px;height:24px;padding-bottom:2px;cursor:pointer}
+.pitem__b .ic-16{color:var(--icon-unaccented_icon-color,#ccc)}
+.pitem__b:hover .ic-16{color:var(--icon-secondary_icon-color,#656c87)}
+.pitem.is-pinned .pitem__t{font-weight:600}
+/* крестик справа только у пользовательских элементов; у готовых пресетов по ховеру остаётся одна левая кнопка */
+.pitem__b--del .ic-16,.pitem__b--del:hover .ic-16{color:var(--icon-danger_icon-color,#c2140a)}
+.pitem:not(.is-user) .pitem__b--del{display:none}
+.pitem.is-other{color:var(--text-unaccented_text-color,#999)}
+.pitem.is-other .pitem__acts{display:none}
+.gpt__sub{display:flex;flex-direction:column;gap:var(--o-s);animation:gptSub .18s ease-out}
+.gpt__sub[hidden]{display:none}
+@keyframes gptSub{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:none}}
+.gpt__body[hidden]{display:none}
+/* Кнопка запуска (Figma 19:14127): info-кнопка 24px, иконка EB1A; ховер/нажатие — варианты hover/press компонента */
+.gpt__launch{display:flex;align-items:center;justify-content:center;flex:none;width:24px;height:24px;padding-bottom:1px;border-radius:var(--r-btn);
+  background:var(--background-contrast-info_color,#6757b7);color:var(--icon-contrast_icon-color,#fff);box-shadow:0 0 3px #0000001a;cursor:pointer}
+.gpt__launch:hover{background:#5949a7}
+.gpt__launch:active{background:#504294;box-shadow:none}
+/* Кнопки результата: обновить и применить (Figma 19:14688 / 19:14690) */
+.gpt__tool{display:flex;align-items:center;justify-content:center;flex:none;width:24px;height:24px;color:var(--icon-secondary_icon-color,#656c87);cursor:pointer}
+.gpt__tool:hover{color:var(--icon-secondary_hover_icon-color,#1e5391)}
+.gpt__tool--ok{color:#298e3c}
+.gpt__tool--ok:hover{color:#1f7a30}
+/* Строка «назад + поле»: стрелка вне поля, справа поле с подчёркиванием (Figma 270:6104) */
+.gpt__row{display:flex;align-items:center;gap:var(--o-2xs);height:24px}
+.gpt__back{display:flex;align-items:center;justify-content:center;flex:none;width:16px;height:24px;color:var(--icon-info_icon-color,#5a49ab);cursor:pointer}
+.gpt__back .ic{display:grid;place-items:center;flex:none;width:24px;height:24px;padding-bottom:1px}
+.gpt__back:hover{color:var(--icon-info_hover_icon-color,#3f2f93)}
+.gpt__rowtext{flex:1;min-width:0;height:24px;display:block;padding:0 0 1px;border-radius:0;border-top:0;border-left:0;border-right:0;outline:0;background:none;font-family:inherit;border-bottom:1px solid var(--border-unaccented_border-color,#d2d6da);
+  font-size:16px;letter-spacing:-.2256px;line-height:22px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text-text-color,#000)}
+.gpt__rowtext::placeholder{color:var(--components-input-placeholder-color_inputtext,#8991a999);opacity:1}
+.gpt__box{background:#fff;border-radius:var(--r-s);padding:12px 8px}
+#promptInput{display:block;width:100%;border:0;outline:0;background:none;resize:none;font:inherit;font-size:15px;letter-spacing:-.2115px;line-height:18px;min-height:18px;max-height:140px;color:var(--text-text-color,#000);overflow:auto}
+#promptInput::placeholder{color:var(--components-input-placeholder-color_inputtext,#8991a999);opacity:1}
+/* Генерация (Figma 23:15364) */
+.gen{display:flex;flex-direction:column;align-items:center;gap:12px;width:227px;margin:0 auto;padding:42px 0 24px}
+.gen[hidden]{display:none}
+.gen__t{font-size:24px;letter-spacing:-.3384px;line-height:29px;color:var(--text-label_text-color,#8991a9);white-space:nowrap;animation:genPulse 1.4s ease-in-out infinite}
+@keyframes genPulse{50%{opacity:.55}}
+.gen__img{position:relative;width:200px;height:212px;flex:none}
+.gen__img img{position:absolute;left:0;top:0;width:201px;height:201px;object-fit:cover}
+.gen__stop{display:flex;align-items:center;justify-content:center;height:24px;padding:0 12px 1px;border-radius:var(--r-btn);background:#fff;font-size:14px;letter-spacing:-.1974px;color:var(--text-text-color,#000);
+  border:1px solid var(--components-button-outlined-same-border-secondary_outlined-same_border-color_button,#0085f2);cursor:pointer}
+.gen__stop:hover{background:var(--background-hover_background-color,#f3f4f8)}
+/* Предпросмотр результата (Figma 19:14679): статичная картинка */
+.result-prev{background:var(--background-unaccented_background-color,#f8f8f8);border-radius:var(--r-s);height:538px;padding:8px;flex:none}
+.result-prev[hidden]{display:none}
+.result-prev__in{position:relative;width:100%;height:100%;overflow:hidden}
+.result-prev__in img{position:absolute;left:-7px;top:-6px;width:933px;height:534px;max-width:none}
+.result-prev.is-empty .result-prev__in{display:none}
+.result-prev.is-empty::after{content:"Положи экспорт предпросмотра в assets/result.png";display:grid;place-items:center;height:100%;color:var(--label);font-size:13px}
+/* Попап выбора модели (19:15110) */
+.popup{position:absolute;background:#fff;border-radius:var(--r-s);box-shadow:0 0 23px #0000001f,0 0 7.5px #0000001f;padding:12px 8px;min-width:220px;z-index:3;display:flex;flex-direction:column;gap:6px}
+.popup[hidden]{display:none}
+/* первый пункт ложится ровно на вызывающую кнопку в шапке: центры иконок совпадают */
+#modelPopup{left:-12px;top:-6px;width:220px}
+.mitem{display:flex;align-items:center;min-height:32px;padding:0 8px 0 12px;border-radius:var(--components-popup-menu-item_border-radius,16px);font-size:16px;letter-spacing:-.2256px;color:#000;cursor:pointer;text-align:left;width:100%}
+.mitem:hover{background:var(--components-dropdownpopup-item_hover_background-color_menu,#f3f4f8)}
+.mitem__i{display:flex;align-items:center;justify-content:center;flex:none;width:24px;height:24px;margin-right:8px;font-family:"cbuc-icons";font-size:20px;line-height:1;color:var(--icon-secondary_icon-color,#656c87);font-style:normal;padding-bottom:1px}
+.mitem__t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding-top:1px}
+.mitem__dot{flex:none;width:12px;height:12px;margin:0 8px 0 10px;display:flex;align-items:center;justify-content:center}
+.mitem__dot::after{content:"";width:6px;height:6px;border-radius:50%;background:#cc3d00}
+.mitem__sp{flex:none;width:8px}
+.popup__x{position:absolute;right:-14px;top:8px;display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:100px;background:var(--background-opacity-translucent_background-color,#cdcdcdcc);color:#fff;cursor:pointer}
+.popup__x:hover{background:var(--background-opacity-translucent_hover_background-color,#c4c4c4cc)}
+.loader{padding:var(--o-xl);text-align:center;color:var(--label)}
+.dashboard{flex-wrap:wrap}
+.widget{background:#fff;border-radius:var(--r-s);box-shadow:var(--shadow-c);padding:var(--o-m);min-height:110px;display:flex;flex-direction:column;gap:var(--o-xs)}
+.widget h4{font-size:14px;font-weight:600}
+.widget .value{font-size:24px;font-weight:600}
+.widget .hint{color:var(--label);font-size:12px}
+.widget--wide{grid-column:span 2}
+
+.ic{font-style:normal;font-weight:400;line-height:1;display:inline-block}
+.ic-14{font-family:"cbuc-icons";font-size:14px}
+.ic-16{font-family:"cbuc-icons";font-size:16px}
+.ic-20{font-family:"cbuc-icons";font-size:20px}
+.ic-24{font-family:"cbuc-icons24";font-size:24px}
+.btn-icon{display:grid;place-items:center}
+.btn-done{display:grid;place-items:center}
+
+/* Правая панель — перенесена из проекта «СШВ 2 (Маша)» (.env-side) */
+.g{display:flex;align-items:center;justify-content:center;flex:none;box-sizing:border-box;padding-bottom:1px;font-style:normal;line-height:normal;white-space:nowrap;user-select:none}
+.g--14{width:14px;height:14px;font-family:"cbuc-icons";font-size:14px}
+.g--20{width:24px;height:24px;font-family:"cbuc-icons";font-size:20px}
+.g--24{width:24px;height:24px;font-family:"cbuc-icons24";font-size:24px}
+.env-side{flex:none;width:56px;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:0 var(--o-2xs) var(--o-s)}
+.env-side__nav{display:flex;flex-direction:column;align-items:center;gap:var(--o-3xs)}
+.env-side__i{display:flex;padding:var(--o-m);border-radius:var(--r-s);color:var(--icon);cursor:pointer}
+.env-side__i--primary{color:#db4200}
+.env-side__i:hover{background:#fff}
+.env-help{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:16px;background:var(--info-bg);border:1px solid var(--info-bg-active);color:#5a49ab;font-size:20px;font-weight:600}
+
+/* SabyGPT: градиент и иконка из макета (узел 58:5628 / hover 58:5627) */
+.btn-gpt{width:32px;height:32px;border-radius:var(--r-btn);display:grid;place-items:center;
+  background:radial-gradient(ellipse 13px 10px at 50% 50%,#c0cdff 0,#ded7ff 54.5%,#f8f8f800 100%)}
+.btn-gpt:hover{background:radial-gradient(ellipse 13px 10px at 50% 50%,#c0cdff 0,#ded7ff 54.5%,#f8f8f800 100%),linear-gradient(rgba(51,51,51,.05),rgba(51,51,51,.05))}
+.btn-gpt.is-open{box-shadow:none}
+/* Сохранение и закрытие: между кнопками 14 px (6 gap + 8), между группами 12 px */
+.btn-done{margin-left:6px}
+.btn-close{margin-left:8px}
+
+/* Масштаб − / +: цвет иконки при наведении — токен ui-kit Icon/secondary_hover_icon-color */
+.zoom__btn{display:flex;align-items:center;justify-content:center;width:24px;height:24px;padding:0;color:var(--icon-secondary_icon-color)}
+.zoom__btn:hover{color:var(--icon-secondary_hover_icon-color)}
+
+/* Центральная зона: 4 ячейки сетки (2 колонки × 2), картинки из Figma 19:10503 растянуты по ячейкам */
+.dashboard{gap:0}
+.dash-existing{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:6px;align-items:start;justify-items:stretch;place-items:start stretch;height:auto;background:none;box-shadow:none;border-radius:0}
+.dash-existing:empty::after{content:none}
+.w-col{display:flex;flex-direction:column;gap:6px;min-width:0}
+/* Ячейка колонки — div, в котором лежит виджет (картинка из Figma — его фон) */
+.wcell{position:relative;width:100%;border-radius:var(--border-radius-border-radius_3xs,2px);background:center / 100% 100% no-repeat}
+.wcell--1{background-image:url(assets/w1.png)}
+/* w2–w4 экспортированы с прозрачными полями 8 px под тень: фон чуть больше ячейки и обрезается по её краю, виджет ложится ровно в ячейку */
+.wcell--2,.wcell--3,.wcell--4{background-size:calc(100% + 16px) calc(100% + 16px)}
+.wcell--2{background-image:url(assets/w2.png)}
+.wcell--3{background-image:url(assets/w3.png)}
+.wcell--4{background-image:url(assets/w4.png)}
+/* Наведение на виджет: обводка — свойство самой ячейки (.wcell), внутри которой лежит виджет; отдельного блока поверх нет */
+/* обводка рисуется отдельным слоем со своим скруглением 2px (@border-radius_3xs), независимо от скругления самого виджета */
+.wcell::after{content:"";position:absolute;inset:0;border:1px solid transparent;border-radius:var(--border-radius-border-radius_3xs,2px);pointer-events:none}
+.wcell:hover::after{border-color:var(--border-info_border-color,#7b62f8)}
+/* два верхних виджета центральной зоны — скругление @border-radius_s */
+.wcell--1,.wcell--3{border-radius:var(--border-radius-border-radius_s,8px)}
+/* пунктир по границе всей сетки и по центру между колонками: штрих 4 px, зазор 4 px, 1 px (линии рисует app.js → drawGrid) */
+.dash-lines{position:absolute;left:0;top:0;z-index:1;pointer-events:none;opacity:0;overflow:visible;stroke:var(--border-info_border-color,#7b62f8);fill:none}
+.dash-existing:has(.wcell:hover) .dash-lines{opacity:1}
+/* Панель операций — из проекта «СШВ 2 (Маша)» (.env-ops): приглушена, сверху «пилюля», снизу две круглые кнопки */
+.dash-ops{width:52px;flex:none;align-self:flex-start;height:846px;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:5px 10px 12px}
+.dash-ops__grp{display:flex;flex-direction:column;align-items:center;gap:16px;opacity:.3}
+.dash-ops__pill{display:flex;padding:4px;border-radius:24px;background:#e5e7eb;color:var(--icon-secondary_icon-color,#656c87)}
+.dash-ops__pill .g{font-size:18px}
+.dash-ops__btn{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:var(--components-button-border-radius_button,100px);background:var(--background-contrast-pale_color,#3333330d);color:#333}
+.dash-ops__btn .g{width:16px;height:16px;font-size:16px;font-family:"cbuc-icons";padding-bottom:1px;box-sizing:content-box}
+/* Центр уведомлений: три виджета-картинки из Figma (335:15365), ховер — сплошная обводка .wcell, без пунктира */
+.ncell--1{background-image:url(assets/n1.png)}
+.ncell--2{background-image:url(assets/n2.png)}
+.ncell--3{background-image:url(assets/n3.png)}
+/* тень @shadow-c у виджетов 2–4 центральной зоны и у трёх виджетов Центра уведомлений (у «Входящих» и нижнего виджета уведомлений тени нет) */
+.wcell--2,.wcell--3,.wcell--4,.ncell--1,.ncell--2{box-shadow:var(--shadow-c)}
+
+/* Варианты пустого: одно поле + подсказка / чипсы / кнопки-ссылки (Figma 290:21241, 290:21628); без стрелки назад и общего списка заготовок */
+.gpt[data-entry]:not([data-entry="sabydoc"])[data-view="sub"] .gpt__row{display:none}
+.gpt__hint{margin-top:-8px;padding:12px 8px 4px;font-size:14px;letter-spacing:-.1974px;line-height:normal;color:var(--text-label_text-color,#8991a9)}
+.gpt__chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:-8px;padding:12px 0 4px;align-items:flex-start}
+.gpt__hint[hidden],.gpt__chips[hidden]{display:none}
+/* чипс contrast: покой — белая плашка, ховер — тонкая обводка (каталог ui-kit, chips) */
+.chip{display:flex;align-items:center;justify-content:center;height:28px;padding:0 12px 1px;border-radius:var(--r-btn);background:var(--components-button-default_contrast_background-color_button,#fff);
+  color:var(--text-label_contrast_text-color,#656c87);font-size:14px;letter-spacing:-.1974px;white-space:nowrap;cursor:pointer;box-shadow:inset 0 0 0 1px transparent}
+.chip:hover,.chip:active{box-shadow:inset 0 0 0 1px var(--border-unaccented_border-color,#d2d6da)}
+/* кнопка-ссылка label: покой #8991a9, ховер/нажатие #313e78 + подчёркивание (как в шапке окна) */
+.gpt__chips.is-links{gap:6px 16px;padding-left:8px}
+.lnk{display:flex;align-items:center;height:24px;padding-bottom:1px;font-size:14px;letter-spacing:-.1974px;white-space:nowrap;cursor:pointer;color:var(--text-label_text-color,#8991a9)}
+.lnk:hover,.lnk:active{color:var(--text-label_hover_text-color,#313e78);text-decoration:underline;text-underline-offset:2px}
+/* в вариантах пустого строки «назад + название» нет ни на каком экране; окно результата на её высоту (24 + 8) ниже */
+.gpt[data-entry]:not([data-entry="sabydoc"]) .gpt__row{display:none}
+.gpt--wide[data-entry]:not([data-entry="sabydoc"]){height:644px}
