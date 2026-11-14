@@ -198,6 +198,14 @@
   $('undoBtn').onclick = () => { const el = applied.pop(); if (!el) return; el.remove(); redone.push(el); syncUndo(); };
   $('redoBtn').onclick = () => { const el = redone.pop(); if (!el) return; $('insertedGrid').append(el); applied.push(el); syncUndo(); requestAnimationFrame(drawGrid); toBottom(); };
 
+  // Сброс (третья кнопка): дашборд возвращается в изначальное состояние — убираем все вставленные ряды, отмена/повтор очищаются
+  $('resetBtn').onclick = () => {
+    if (!win.hidden) open(false);
+    $('insertedGrid').innerHTML = '';
+    applied.length = 0; redone.length = 0; syncUndo();
+    $('currentGrid').scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   // Зелёная галка: вставляем показанный вариант вниз текущего дашборда, промт уходит в историю под названием из верхней строки
   $('doneBtn').onclick = () => {
     const rowEl = buildRow(ROWS[variants[vi].row]);
