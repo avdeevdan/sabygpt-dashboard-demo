@@ -49,12 +49,14 @@ button{font:inherit;border:0;background:none;cursor:pointer;color:inherit}
 .dash-notify{width:250px;flex:none;display:flex;flex-direction:column;gap:6px;align-self:flex-start}
 
 /* Окно SabyGPT (Figma 270:5288), элементы списка (11:373), попап выбора модели (19:15110) */
-.gpt-scrim{position:absolute;inset:0;z-index:10;display:flex;align-items:flex-start;justify-content:center;background:var(--background-contrast-pale_color,#3333330d);border-radius:inherit}
+.gpt-scrim{position:absolute;inset:0;z-index:10;display:flex;align-items:flex-start;justify-content:center;background:none;border-radius:inherit}
 .gpt-scrim[hidden]{display:none}
-.gpt{position:relative;width:550px;margin-top:0;transition:width .2s ease,margin-top .25s ease;max-height:calc(100% - 48px);display:flex;flex-direction:column;padding:0 var(--o-m) var(--o-m);border-radius:12px;
+.gpt{position:relative;width:550px;margin-top:0;transition:width .2s ease,margin-top .25s ease;max-height:calc(100% - 48px);display:flex;flex-direction:column;padding:0 var(--o-m) var(--o-m);border-radius:var(--border-radius-border-radius_s,8px);
   background:var(--components-constructor-simplifiedconstructor_background-color,#eceaf5);
   box-shadow:0 0 46px #0000001f,0 0 15px #0000001f}
-.gpt__header{display:flex;align-items:center;justify-content:space-between;padding:var(--o-xs) 0;flex:none}
+.gpt__header{display:flex;align-items:center;justify-content:space-between;padding:var(--o-xs) 0;flex:none;cursor:grab;touch-action:none;user-select:none}
+.gpt__header.is-dragging{cursor:grabbing}
+.gpt__header button,.gpt__header input,.gpt__header a{cursor:pointer}
 .gpt__headR{display:flex;align-items:center;gap:12px}
 .gpt--wide{width:960px;height:676px}
 .gpt--wide .gpt__sub{flex:1;min-height:0}
@@ -71,7 +73,8 @@ button{font:inherit;border:0;background:none;cursor:pointer;color:inherit}
 .gpt__model{display:flex;align-items:center;height:26px;padding:2px 0 0;color:var(--text-label_text-color,#8991a9);font-size:14px;cursor:pointer}
 /* кнопка в шапке — link/label из каталога ui-kit: ховер и пресс — токены label_hover (#313e78), текст подчёркнут */
 .gpt__model:hover,.gpt__model:active,.gpt__model.is-open{color:var(--text-label_hover_text-color,#313e78)}
-.gpt__model:hover .ic,.gpt__model:active .ic,.gpt__model.is-open .ic{color:var(--icon-label_hover_icon-color,#313e78)}
+.gpt__model .ic{color:var(--icon-secondary_icon-color,#656c87)}
+.gpt__model:hover .ic,.gpt__model:active .ic,.gpt__model.is-open .ic{color:var(--icon-link_hover_icon-color,#153f6f)}
 .gpt__model:hover span,.gpt__model:active span,.gpt__model.is-open span{text-decoration:underline;text-underline-offset:2px}
 .gpt__model .ic{margin-right:4px;display:flex;align-items:center;justify-content:center;width:16px;height:16px;padding-bottom:1px}
 .gpt__icon{display:flex;align-items:center;justify-content:center;width:32px;height:32px;margin:0 -4px;flex:none;border-radius:var(--r-btn);color:var(--icon-secondary_icon-color,#656c87);cursor:pointer}
@@ -79,7 +82,7 @@ button{font:inherit;border:0;background:none;cursor:pointer;color:inherit}
 .gpt__icon[hidden],.gpt__launch[hidden],.gpt__tool[hidden]{display:none}
 .gpt__body{background:#fff;border-radius:var(--r-s);padding:var(--o-s) 0;overflow:auto;min-height:0}
 /* Элемент списка (11:373): статика / ховер с кнопками справа */
-.pitem{display:flex;align-items:center;justify-content:space-between;height:31px;padding:4px 6px 3px 12px;cursor:pointer;font-size:14px;color:#000}
+.pitem{position:relative;display:flex;align-items:center;justify-content:space-between;height:30px;padding:0 6px 2px 12px;cursor:pointer;font-size:14px;color:#000}
 .pitem:hover{background:var(--background-hover_background-color,#f3f4f8)}
 .pitem__t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pitem__acts{display:flex;align-items:center;gap:12px;opacity:0;flex:none}
@@ -116,17 +119,23 @@ button{font:inherit;border:0;background:none;cursor:pointer;color:inherit}
   font-size:16px;letter-spacing:-.2256px;line-height:22px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text-text-color,#000)}
 .gpt__rowtext::placeholder{color:var(--components-input-placeholder-color_inputtext,#8991a999);opacity:1}
 .gpt__box{background:#fff;border-radius:var(--r-s);padding:12px 8px}
+.gpt[data-preset="1"] .gpt__box{display:none}
 #promptInput{display:block;width:100%;border:0;outline:0;background:none;resize:none;font:inherit;font-size:15px;letter-spacing:-.2115px;line-height:18px;min-height:18px;max-height:140px;color:var(--text-text-color,#000);overflow:auto}
 #promptInput::placeholder{color:var(--components-input-placeholder-color_inputtext,#8991a999);opacity:1}
 /* Генерация (Figma 23:15364) */
 .gen{display:flex;flex-direction:column;align-items:center;gap:12px;width:227px;margin:0 auto;padding:42px 0 24px}
 .gen[hidden]{display:none}
-.gen__t{font-size:24px;letter-spacing:-.3384px;line-height:29px;color:var(--text-label_text-color,#8991a9);white-space:nowrap;animation:genPulse 1.4s ease-in-out infinite}
-@keyframes genPulse{50%{opacity:.55}}
+.gen__t{font-size:24px;letter-spacing:-.3384px;line-height:29px;color:var(--text-label_text-color,#8991a9);white-space:nowrap}
 .gen__img{position:relative;width:200px;height:212px;flex:none}
 .gen__img img{position:absolute;left:0;top:0;width:201px;height:201px;object-fit:cover}
-.gen__stop{display:flex;align-items:center;justify-content:center;height:24px;padding:0 12px 1px;border-radius:var(--r-btn);background:#fff;font-size:14px;letter-spacing:-.1974px;color:var(--text-text-color,#000);
-  border:1px solid var(--components-button-outlined-same-border-secondary_outlined-same_border-color_button,#0085f2);cursor:pointer}
+.gen--err{width:100%;padding:42px 0 24px}
+.gen--err .gen__t{white-space:normal;text-align:center}
+.err__links{display:flex;gap:4px;align-items:baseline;font-size:14px;letter-spacing:-.1974px;line-height:24px;color:var(--text-unaccented_text-color,#999)}
+.err__lnk{height:24px;padding:0 0 1px;font-size:14px;letter-spacing:-.1974px;color:var(--text-link_text-color,#2562aa);cursor:pointer}
+.err__lnk:hover,.err__lnk:active{color:var(--text-link_hover_text-color,#153f6f);text-decoration:underline}
+.gen__img--err img{left:0;top:6px;width:200px;height:200px}
+.gen__stop{display:flex;align-items:center;justify-content:center;height:24px;padding:0 13px 1px;border-radius:var(--r-btn);background:#fff;font-size:14px;letter-spacing:-.1974px;color:var(--text-text-color,#000);
+  box-shadow:inset 0 0 0 1px var(--components-button-outlined-same-border-secondary_outlined-same_border-color_button,#0085f2);cursor:pointer}   /* обводка — внутри той же белой фигуры, а не отдельным овалом */
 .gen__stop:hover{background:var(--background-hover_background-color,#f3f4f8)}
 /* Предпросмотр результата (Figma 19:14679): статичная картинка */
 .result-prev{background:var(--background-unaccented_background-color,#f8f8f8);border-radius:var(--r-s);height:538px;padding:8px;flex:none}
@@ -242,3 +251,25 @@ button{font:inherit;border:0;background:none;cursor:pointer;color:inherit}
 /* в вариантах пустого строки «назад + название» нет ни на каком экране; окно результата на её высоту (24 + 8) ниже */
 .gpt[data-entry]:not([data-entry="sabydoc"]) .gpt__row{display:none}
 .gpt--wide[data-entry]:not([data-entry="sabydoc"]){height:644px}
+
+/* Попап «Сбросить изменения» под кнопкой сброса: оформление как у попапа выбора модели, без выбранного пункта */
+.reset-wrap{position:relative;display:flex}
+#resetPopup{left:-8px;top:-8px;width:250px;padding:8px 8px 12px;gap:2px}
+.popup__h{display:flex;align-items:center;justify-content:space-between;height:32px;padding:0 4px 0 12px;font-size:14px;letter-spacing:1.25px;text-transform:uppercase;color:var(--text-label_text-color,#8991a9)}
+.popup__hx{display:flex;align-items:center;justify-content:center;width:24px;height:24px;color:var(--icon-secondary_icon-color,#656c87);cursor:pointer}
+.popup__hx:hover{color:var(--icon-secondary_hover_icon-color,#313e78)}
+
+/* Заготовленный промт: строка справа от «назад» — обычная кнопка (16px, text-color → hover_text-color, без подчёркивания) */
+.gpt__rowbtn{flex:1;min-width:0;height:24px;display:none;align-items:center;padding:0 0 1px;text-align:left;font-size:16px;letter-spacing:-.2256px;line-height:22px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text-text-color,#000);cursor:pointer}
+.gpt__rowbtn:hover,.gpt__rowbtn:active{color:var(--text-hover_text-color,#575757)}
+.gpt[data-rowbtn="1"] .gpt__rowbtn{display:block}
+.gpt[data-rowbtn="1"] .gpt__rowtext{display:none}
+/* Меню параметров (Figma 374:8714): крестик попапа совпадает с кнопкой-вызывателем */
+#menuPopup{width:270px;padding:8px 8px 12px;gap:6px}
+.mitem__i--24{font-family:"cbuc-icons24";font-size:24px;padding-bottom:0}
+.mitem--share{padding-right:2px}
+.mitem--share:hover .mitem__ar{background:var(--background-background-color,#fff);border-radius:50%}
+.mitem__ar{display:flex;align-items:center;justify-content:center;flex:none;width:28px;height:28px;font-family:"cbuc-icons";font-style:normal;font-size:16px;color:var(--icon-secondary_icon-color,#656c87)}
+
+/* Маркер у только что закреплённого пункта (Figma 376:8728): пропадает, как только уходим из списка: 3x16, radius 4, extra/marker_color, слева по центру */
+.pitem.is-marked::before{content:"";position:absolute;left:0;top:50%;width:3px;height:16px;margin-top:-8px;border-radius:var(--border-radius-border-radius_2xs,4px);background:var(--extra-marker_color,#cc3d00)}

@@ -7,6 +7,10 @@
   const anchors = {};                                        // верх окна для каждой точки входа запоминается при первом открытии
   const CHIPS = ['Главные показатели компании', 'Для работы с клиентами', 'Для работы с сотрудниками и задачами', 'Товары и остатки'];
   const PH = { sabydoc: 'Например, нужен дашборд с отображением остатков товаров', v1: 'Опишите, какой дашборд вам нужен', v2: 'Опишите, какие виджеты вы хотите видеть на дашборде', v3: 'Опишите, какие виджеты вы хотите видеть на дашборде' };
+  let curItem = null;                                          // пункт списка, из которого запущена текущая генерация (для «Закрепить» в меню)
+  let errMode = false;                                          // сценарий «с ошибкой»: свой промт заканчивается ошибкой, заготовки работают как обычно
+  let aborted = false;                                          // после «Прервать»: окно ввода, строка справа от «назад» — кнопка с текстом промта
+  let presetMode = false;                                      // промт взят из заготовки: строка справа от «назад» — кнопка, не поле
   let variants = [], vi = 0, titleTouched = false;           // варианты ответа текущего промта и номер показанного
 
   // Пробуем подцепить экспорт дашборда из Figma
@@ -15,7 +19,7 @@
   const gif = new Image(); gif.onerror = () => document.querySelector('.gen__img img')?.remove(); gif.src = 'assets/gen.gif';
 
   const show = (el, on) => el.hidden = !on;
-  const closePopups = () => { show($('modelPopup'), false); $('modelBtn').classList.remove('is-open'); };
+  const closePopups = () => { show($('modelPopup'), false); show($('resetPopup'), false); show($('menuPopup'), false); $('modelBtn').classList.remove('is-open'); };
 
   // Список: заготовки (Figma 11:373) и история. По ховеру — кнопка «закрепить»; крестик только у истории
   // «Закрепить / Открепить»: закреплённая запись уходит наверх списка (новая закреплённая — самая верхняя), открепили — возвращается на своё место.
@@ -34,18 +38,21 @@
     it.querySelector('.pitem__t').textContent = p.text;
     const o = { el: it, pin: 0, other: !!p.other };
     const pinBtn = it.querySelector('.pitem__b--pin');
-    pinBtn.onclick = e => {
-      e.stopPropagation();
+    o.toggle = () => {
       o.pin = o.pin ? 0 : ++pinSeq;
       it.classList.toggle('is-pinned', !!o.pin);
+      // маркер-фокус внимания: один на весь список — у пункта, с которым действовали последним (закрепили или открепили), живёт, пока не уйдём из списка
+      document.querySelectorAll('.pitem.is-marked').forEach(n => n.classList.remove('is-marked'));
+      it.classList.add('is-marked');   // и при закреплении, и при откреплении — чтобы не потерять пункт из виду
       pinBtn.title = o.pin ? 'Открепить' : 'Закрепить';
       pinBtn.firstChild.textContent = o.pin ? '\uEA09' : '\uE97C';
       renderList();
     };
+    pinBtn.onclick = e => { e.stopPropagation(); o.toggle(); };
     it.querySelector('.pitem__b--del').onclick = e => { e.stopPropagation(); items.splice(items.indexOf(o), 1); it.remove(); };
     it.onclick = () => {
-      if (p.other) { input.value = ''; row.value = ''; titleTouched = false; view('sub'); input.focus(); }
-      else run(p.prompt || p.text, p.text);
+      if (p.other) { presetMode = false; input.value = ''; row.value = ''; titleTouched = false; view('sub'); input.focus(); }
+      else { presetMode = true; curItem = o; run(p.prompt || p.text, p.text); }
     };
     const at = items.findIndex(i => i.other);
     if (at >= 0 && !p.other) items.splice(at, 0, o); else items.push(o);
@@ -80,13 +87,15 @@
     input.placeholder = PH[entry];
     show($('hint'), v === 'sub' && entry === 'v1');
     show($('chips'), v === 'sub' && (entry === 'v2' || entry === 'v3'));
-    show($('genZone'), v === 'load'); show($('resultPrev'), v === 'result');
+    show($('genZone'), v === 'load'); show($('errZone'), v === 'error'); show($('resultPrev'), v === 'result');
     // повторная генерация («другой ответ») идёт в окне размера результата, чтобы оно не прыгало
     const wide = v === 'result' || (v === 'load' && variants.length > 0);
     gpt.classList.toggle('gpt--wide', wide);
     // положение по вертикали: пока выбираем/вводим промт — не меняется, с результатом окно уходит в центр дашборда
     // «якорь» берётся один раз — при первом открытии по центру; дальше окно стоит там же (запись истории или её удаление его не двигают)
+    if (v !== 'sub') aborted = false;
     gpt.dataset.entry = entry; gpt.dataset.view = v;
+    if (v !== 'list') document.querySelectorAll('.pitem.is-marked').forEach(n => n.classList.remove('is-marked'));
     if (baseTop === null && !win.hidden && (v === 'list' || (v === 'sub' && entry !== 'sabydoc'))) {
       if (anchors[entry] == null) {
         // окно ввода стоит ровно по центру конструктора (отступ сверху = отступ снизу); при генерации верх остаётся на месте
@@ -97,10 +106,13 @@
     // в вариантах пустого окно центрируется по конструктору целиком (центр сцены), а не по дашборду
     gpt.style.left = entry === 'sabydoc' ? '' : (mid().x - win.clientWidth / 2) + 'px';
     gpt.style.marginTop = (wide ? Math.max(24, (entry === 'sabydoc' ? win.clientHeight / 2 : mid().y) - gpt.offsetHeight / 2) : baseTop) + 'px';
-    input.readOnly = v === 'load' || v === 'result';
+    input.readOnly = v === 'load' || v === 'result' || v === 'error';
 
     row.readOnly = v === 'load';
-    if (v === 'sub' && !titleTouched) row.value = '';
+    const pm = v === 'load' || v === 'result' || v === 'error' || (v === 'sub' && aborted);   // и для заготовки, и для своего промта: строка справа от «назад» — кнопка
+    gpt.dataset.rowbtn = pm ? '1' : '0'; gpt.dataset.preset = presetMode && (v === 'load' || v === 'result') ? '1' : '0';   $('rowBtn').textContent = row.value;   // у заготовки белое поле с промтом не нужно: текст уже в кнопке справа от «назад»
+    show($('menuBtn'), v === 'result' && presetMode);   // меню «три точки» — только для заготовок, у своего промта его нет
+    if (v === 'sub' && !titleTouched && !aborted) row.value = '';
     show($('refreshBtn'), v === 'result'); show($('doneBtn'), v === 'result');
     show($('variants'), v === 'result' && variants.length > 1);
     renderVariant(); sync(); closePopups();
@@ -110,17 +122,72 @@
   const open = on => {
     show(win, on); btn.classList.toggle('is-open', on); closePopups();
     if (on) {
+      presetMode = false; aborted = false;
+      dragX = 0; dragY = 0; applyDrag();   // при новом открытии окно снова по центру
       input.value = ''; row.value = ''; input.style.height = ''; baseTop = null; variants = []; vi = 0; titleTouched = false;
       if (entry === 'v2' || entry === 'v3') buildChips();
       gpt.style.transition = 'none'; view(entry === 'sabydoc' ? 'list' : 'sub'); gpt.offsetHeight; gpt.style.transition = '';
       if (entry !== 'sabydoc') input.focus();
     } else clearTimeout(timer);
   };
+  // Перетаскивание окна за шапку (кроме кнопок): сдвиг хранится отдельно от расчёта положения, поэтому окно остаётся там, куда его унесли
+  let dragX = 0, dragY = 0;
+  const applyDrag = () => { gpt.style.translate = (dragX || dragY) ? dragX + 'px ' + dragY + 'px' : ''; };
+  const head = gpt.querySelector('.gpt__header');
+  head.addEventListener('pointerdown', e => {
+    if (e.button !== 0 || e.target.closest('button, input, a')) return;
+    e.preventDefault();
+    const k = $('stage').getBoundingClientRect().width / 1600, sx = e.clientX, sy = e.clientY, x0 = dragX, y0 = dragY;
+    head.classList.add('is-dragging'); try { head.setPointerCapture(e.pointerId); } catch (_) {} closePopups();
+    const move = ev => {
+      dragX = x0 + (ev.clientX - sx) / k; dragY = y0 + (ev.clientY - sy) / k; applyDrag();
+      // окно нельзя унести совсем за край: шапка всегда остаётся в зоне видимости
+      const g = gpt.getBoundingClientRect(), w = win.getBoundingClientRect(), m = 60;
+      if (g.right < w.left + m) dragX += (w.left + m - g.right) / k;
+      if (g.left > w.right - m) dragX -= (g.left - (w.right - m)) / k;
+      if (g.top < w.top) dragY += (w.top - g.top) / k;
+      if (g.top > w.bottom - 40) dragY -= (g.top - (w.bottom - 40)) / k;
+      applyDrag();
+    };
+    const up = () => { head.classList.remove('is-dragging'); head.removeEventListener('pointermove', move); head.removeEventListener('pointerup', up); head.removeEventListener('pointercancel', up); };
+    head.addEventListener('pointermove', move); head.addEventListener('pointerup', up); head.addEventListener('pointercancel', up);
+  });
+
   btn.onclick = () => open(win.hidden);
   $('gptClose').onclick = () => open(false);          // крестик: закрыть без сохранений
 
   // «назад»: из генерации/результата — к редактированию промта, из ввода — к списку
-  $('backBtn').onclick = () => { if (cur === 'sub') view('list'); else { view('sub'); input.focus(); } };
+  $('rowBtn').onclick = () => {
+    if (aborted) { aborted = false; view('sub'); row.focus(); }   // после «Прервать» клик по строке возвращает её к редактированию
+    else $('backBtn').click();
+  };
+  // меню параметров: попап встаёт так, что его крестик (центр на правом краю попапа, 22px от верха) совпадает с кнопкой-вызывателем
+  $('menuBtn').onclick = e => {
+    e.stopPropagation();
+    const mp2 = $('menuPopup'), on = mp2.hidden; closePopups();
+    if (!on) return;
+    const pinned = !!(curItem && curItem.pin), pinRow = mp2.querySelector('[data-menu="pin"]');
+    pinRow.querySelector('.mitem__t').textContent = pinned ? 'Открепить' : 'Закрепить';
+    pinRow.querySelector('.mitem__i').textContent = pinned ? '\uEA09' : '\uE97C';
+    show(mp2, true);
+    const g = gpt.getBoundingClientRect(), b = $('menuBtn').getBoundingClientRect(), k = g.width / gpt.offsetWidth;
+    mp2.style.left = ((b.left + b.width / 2 - g.left) / k - mp2.offsetWidth) + 'px';
+    mp2.style.top = ((b.top + b.height / 2 - g.top) / k - 22) + 'px';
+  };
+  $('menuPopupX').onclick = e => { e.stopPropagation(); closePopups(); };
+  $('menuPopup').onclick = e => e.stopPropagation();
+  document.querySelectorAll('#menuPopup [data-menu]').forEach(n => n.onclick = e => {
+    e.stopPropagation(); closePopups();
+    if (n.dataset.menu === 'pin' && curItem) curItem.toggle();   // то же, что скрепка в общем списке
+  });
+  $('backBtn').onclick = () => {
+    if (cur === 'sub') view('list');
+    else if (presetMode) {           // из заготовки возвращаемся в общий список, а не в свой промт
+      clearTimeout(timer); presetMode = false; input.value = ''; row.value = ''; input.style.height = ''; titleTouched = false; variants = []; vi = 0;
+      baseTop = parseFloat(gpt.style.marginTop) || baseTop;   // окно остаётся на той же высоте, что и после генерации; при новом открытии снова центрируется
+      gpt.style.transition = 'none'; view('list'); gpt.offsetHeight; gpt.style.transition = '';   // без анимации сжатия
+    } else { view('sub'); input.focus(); }
+  };
   input.oninput = () => { sync(); grow(); };
   row.oninput = () => { titleTouched = true; sync(); };
   input.onkeydown = e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); if (!launch.hidden) launch.click(); } };
@@ -128,11 +195,18 @@
 
   // Запуск: промт — из белого поля (или из верхней строки, если белое пустое)
   launch.onclick = () => {
+    presetMode = false;
     const text = input.value.trim() || row.value.trim();
     run(text, titleTouched && row.value.trim() ? row.value.trim() : text);
   };
+  $('errEdit').onclick = () => { aborted = true; view('sub'); };   // «Измените» описание
+  $('errRetry').onclick = () => generate();                       // «повторите» генерацию
   $('refreshBtn').onclick = () => generate();                       // «другой ответ» — новая генерация
-  $('stopBtn').onclick = () => { if (variants.length) view('result'); else { view('sub'); input.focus(); } };
+  $('stopBtn').onclick = () => {
+    clearTimeout(timer);
+    if (variants.length) view('result');
+    else { presetMode = false; aborted = true; view('sub'); }   // область генерации уходит, окно остаётся на месте, промт — в кнопке справа от «назад»
+  };
 
   function run(text, title) {
     input.value = text; row.value = title; grow();
@@ -143,10 +217,11 @@
   function generate() {
     view('load');
     timer = setTimeout(() => {
+      if (errMode && !presetMode) { view('error'); return; }   // сценарий «с ошибкой»: свой промт — «виджеты не найдены»
       variants.push({ src: IMGS[variants.length % IMGS.length], row: variants.length % IMGS.length });
       vi = variants.length - 1;
       view('result');
-    }, 2000 + Math.random() * 1000);   // имитация генерации 2–3 с
+    }, presetMode ? 1000 + Math.random() * 1000 : 3000 + Math.random() * 2000);   // имитация генерации: заготовка 1–2 с, свой промт 3–5 с
   }
 
   // Показанный вариант и переключатель вариантов в шапке (Figma 109:10059)
@@ -193,18 +268,28 @@
 
   // Отменить / Повторить на верхней панели: левая убирает последнюю вставку (дашборд как был), правая возвращает сгенерированный
   const applied = [], redone = [];
-  const syncUndo = () => { $('undoBtn').classList.toggle('is-disabled', !applied.length); $('redoBtn').classList.toggle('is-disabled', !redone.length); };
+  const syncUndo = () => { $('undoBtn').classList.toggle('is-disabled', !applied.length); $('redoBtn').classList.toggle('is-disabled', !redone.length); $('resetBtn').classList.toggle('is-disabled', !applied.length); };
   const toBottom = () => { const g = $('currentGrid'); requestAnimationFrame(() => g.scrollTo({ top: g.scrollHeight, behavior: 'smooth' })); };
   $('undoBtn').onclick = () => { const el = applied.pop(); if (!el) return; el.remove(); redone.push(el); syncUndo(); };
   $('redoBtn').onclick = () => { const el = redone.pop(); if (!el) return; $('insertedGrid').append(el); applied.push(el); syncUndo(); requestAnimationFrame(drawGrid); toBottom(); };
 
-  // Сброс (третья кнопка): дашборд возвращается в изначальное состояние — убираем все вставленные ряды, отмена/повтор очищаются
-  $('resetBtn').onclick = () => {
+  // Сброс (третья кнопка): одним кликом возвращает дашборд к состоянию до любых генераций (вместо многих «Отменить»); после сброса серая, как и пока генераций не было
+  const doReset = () => {
+    if (!applied.length) return;
     if (!win.hidden) open(false);
     $('insertedGrid').innerHTML = '';
     applied.length = 0; redone.length = 0; syncUndo();
     $('currentGrid').scrollTo({ top: 0, behavior: 'smooth' });
   };
+  // клик по кнопке сброса поднимает меню «Сбросить изменения»; любой пункт возвращает дашборд в стартовое состояние
+  $('resetBtn').onclick = e => {
+    e.stopPropagation();
+    if ($('resetBtn').classList.contains('is-disabled')) return;
+    const on = $('resetPopup').hidden; closePopups(); show($('resetPopup'), on);
+  };
+  $('resetPopupX').onclick = e => { e.stopPropagation(); closePopups(); };
+  $('resetPopup').onclick = e => e.stopPropagation();
+  document.querySelectorAll('#resetPopup [data-reset]').forEach(n => n.onclick = e => { e.stopPropagation(); closePopups(); doReset(); });
 
   // Зелёная галка: вставляем показанный вариант вниз текущего дашборда, промт уходит в историю под названием из верхней строки
   $('doneBtn').onclick = () => {
@@ -284,10 +369,11 @@ window.addEventListener('load', drawGrid);
     },
     scenarios: [
       { id: 'sabydoc', title: 'Как в Sabydoc' },
+      { id: 'sabydoc_err', title: 'С ошибкой генерации', indent: 20 },
       { group: 'Варианты пустого', items: [{ id: 'v1', title: 'Одно поле с подсказкой' }, { id: 'v2', title: 'Одно поле с чипсами' }, { id: 'v3', title: 'Одно поле с кнопками-ссылками' }] }
     ],
     value: { scenario: 'sabydoc' },
-    onChange: v => { entry = v.scenario; if (!win.hidden) open(false); },   // точка входа в генерацию; открытое окно закрываем, чтобы оно открылось уже по новому сценарию
+    onChange: v => { errMode = v.scenario === 'sabydoc_err'; entry = errMode ? 'sabydoc' : v.scenario; if (!win.hidden) open(false); },   // точка входа в генерацию; открытое окно закрываем, чтобы оно открылось уже по новому сценарию
     links: [{ title: 'Макет в Figma', href: 'https://www.figma.com/proto/WbLZOk7jbsIlxgK6OVO10b/%D0%93%D0%B5%D0%BD%D0%B5%D1%80%D0%B0%D1%86%D0%B8%D1%8F-%D0%B4%D0%B0%D1%88%D0%B1%D0%BE%D1%80%D0%B4%D0%BE%D0%B2?node-id=19-7988&p=f&t=AqKOkCHVLElFCeZT-8&scaling=min-zoom&content-scaling=fixed&page-id=0%3A1&starting-point-node-id=19%3A7988&hide-ui=1' }],
     team: [{ label: 'Design', name: 'Авдеев Даниил' }, { label: 'Develop' }]
   });

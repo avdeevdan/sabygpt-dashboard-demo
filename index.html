@@ -21,7 +21,13 @@
         <span class="sep"></span>
         <button class="btn-icon is-disabled" id="undoBtn" aria-label="Отменить"><i class="ic ic-20">&#xE6CF;</i></button>
         <button class="btn-icon is-disabled" id="redoBtn" aria-label="Повторить"><i class="ic ic-20">&#xE6CA;</i></button>
-        <button class="btn-icon" id="resetBtn" aria-label="Сброс"><i class="ic ic-20">&#xE629;</i></button>
+        <span class="reset-wrap"><button class="btn-icon is-disabled" id="resetBtn" aria-label="Сбросить изменения"><i class="ic ic-20">&#xE629;</i></button>
+          <div class="popup" id="resetPopup" hidden>
+            <div class="popup__h"><span>Сбросить изменения</span><button class="popup__hx" id="resetPopupX" title="Закрыть"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 1.5l9 9M10.5 1.5l-9 9"/></svg></button></div>
+            <div class="mitem" data-reset><span class="mitem__t">Все</span></div>
+            <div class="mitem" data-reset><span class="mitem__t">Текущего дашборда</span></div>
+            <div class="mitem" data-reset><span class="mitem__t">Центр уведомлений</span></div>
+          </div></span>
         <span class="sep"></span>
         <span class="zoom"><button class="zoom__btn" aria-label="Уменьшить"><i class="ic ic-24">&#xE6EA;</i></button><span>75%</span><button class="zoom__btn" aria-label="Увеличить"><i class="ic ic-24">&#xE6E9;</i></button></span>
         <button class="btn-done" aria-label="Сохранить"><i class="ic ic-24">&#xE75E;</i></button>
@@ -74,10 +80,17 @@
                 </div>
                 <div class="gpt__headR">
                   <button class="gpt__launch" id="launchBtn" hidden title="Сгенерировать"><i class="ic ic-16">&#xEB1A;</i></button>
+                  <button class="gpt__tool" id="menuBtn" hidden title="Меню"><i class="ic ic-24" style="font-family:'cbuc-icons24'">&#xE9D9;</i></button>
                   <button class="gpt__tool" id="refreshBtn" hidden title="Сгенерировать заново"><i class="ic ic-24">&#xE62C;</i></button>
                   <button class="gpt__tool gpt__tool--ok" id="doneBtn" hidden title="Применить результат"><i class="ic ic-24">&#xE75E;</i></button>
                   <button class="gpt__icon" id="gptClose" title="Закрыть"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 1.5l9 9M10.5 1.5l-9 9"/></svg></button>
                 </div>
+              </div>
+              <div class="popup" id="menuPopup" hidden>
+                <button class="popup__x" id="menuPopupX" title="Закрыть"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 1.5l9 9M10.5 1.5l-9 9"/></svg></button>
+                <div class="mitem" data-menu="pin"><i class="mitem__i mitem__i--24">&#xE97C;</i><span class="mitem__t">Закрепить</span></div>
+                <div class="mitem mitem--share" data-menu><i class="mitem__i mitem__i--24">&#xE6A7;</i><span class="mitem__t">Ссылка/Поделиться</span><i class="mitem__ar">&#xE9AB;</i></div>
+                <div class="mitem" data-menu><i class="mitem__i mitem__i--24">&#xE628;</i><span class="mitem__t">Скачать</span></div>
               </div>
               <div class="popup" id="modelPopup" hidden>
                 <button class="popup__x" id="modelPopupX" title="Закрыть"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 1.5l9 9M10.5 1.5l-9 9"/></svg></button>
@@ -89,6 +102,7 @@
               <div class="gpt__sub" id="promptZone" hidden>
                 <div class="gpt__row">
                   <button class="gpt__back" id="backBtn" title="Назад"><i class="ic ic-20">&#xE9A9;</i></button>
+                  <button class="gpt__rowbtn" id="rowBtn" type="button"></button>
                   <input class="gpt__rowtext" id="rowInput" type="text" maxlength="120" placeholder="Собери свой дашборд" autocomplete="off">
                 </div>
                 <div class="gpt__box"><textarea id="promptInput" rows="1" placeholder="Например, нужен дашборд с отображением остатков товаров"></textarea></div>
@@ -98,6 +112,11 @@
                   <div class="gen__t">Генерируем ответ...</div>
                   <div class="gen__img"><img src="assets/gen.gif" alt=""></div>
                   <button class="gen__stop" id="stopBtn">Прервать</button>
+                </div>
+                <div class="gen gen--err" id="errZone" hidden>
+                  <div class="gen__t">Под ваше описание виджеты не найдены</div>
+                  <div class="err__links"><button class="err__lnk" id="errEdit" type="button">Измените</button><span>описание или</span><button class="err__lnk" id="errRetry" type="button">повторите</button><span>генерацию</span></div>
+                  <div class="gen__img gen__img--err"><img src="assets/error.png" alt=""></div>
                 </div>
                 <div class="result-prev" id="resultPrev" hidden><div class="result-prev__in"><img id="resultImg" alt="Предпросмотр результата"></div></div>
               </div>

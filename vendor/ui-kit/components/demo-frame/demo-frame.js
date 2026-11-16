@@ -36,14 +36,14 @@
   }
 
   // ---------- Сценарии ----------
-  // Пункт: { id, title, disabled, hidden, variants: [{ id, title, disabled }] }; группа: { group, items, hidden }.
+  // Пункт: { id, title, indent (px), disabled, hidden, variants: [{ id, title, disabled }] }; группа: { group, items, hidden }.
   // Подряд идущие пункты без группы — один белый блок.
-  function radioHTML(scenario, variant, title, disabled) {
-    return `<button class="df-radio" type="button" role="radio" aria-checked="false" data-scenario="${esc(scenario)}"${variant != null ? ` data-variant="${esc(variant)}"` : ''}${disabled ? ' disabled' : ''}><span class="df-radio__box"></span><span class="df-radio__text">${esc(title)}</span></button>`;
+  function radioHTML(scenario, variant, title, disabled, indent) {
+    return `<button class="df-radio"${indent ? ` style="margin-left:${indent}px"` : ''} type="button" role="radio" aria-checked="false" data-scenario="${esc(scenario)}"${variant != null ? ` data-variant="${esc(variant)}"` : ''}${disabled ? ' disabled' : ''}><span class="df-radio__box"></span><span class="df-radio__text">${esc(title)}</span></button>`;
   }
   function itemHTML(it) {
     if (it.hidden) return '';
-    let html = radioHTML(it.id, null, it.title, it.disabled);
+    let html = radioHTML(it.id, null, it.title, it.disabled, it.indent);
     const vars = (it.variants || []).filter((v) => !v.hidden);
     if (vars.length) html += `<div class="df-sub">${vars.map((v) => radioHTML(it.id, v.id, v.title, it.disabled || v.disabled)).join('')}</div>`;
     return html;
