@@ -189,7 +189,8 @@
       if (aborted && entry === 'sabydoc') addUserItem();   // прерванный промт попадает в общий список как «сгенерированный» вариант
       view('list');
     }
-    else if (presetMode) {           // из заготовки возвращаемся в общий список, а не в свой промт
+    else if (presetMode || ((cur === 'result' || cur === 'load') && entry === 'sabydoc')) {   // из заготовки, а также во время генерации и из готового результата своего промта — в общий список
+      if (!presetMode) addUserItem();   // свой сгенерированный вариант попадает в список
       clearTimeout(timer); presetMode = false; input.value = ''; row.value = ''; input.style.height = ''; titleTouched = false; variants = []; vi = 0;
       baseTop = parseFloat(gpt.style.marginTop) || baseTop;   // окно остаётся на той же высоте, что и после генерации; при новом открытии снова центрируется
       gpt.style.transition = 'none'; view('list'); gpt.offsetHeight; gpt.style.transition = '';   // без анимации сжатия
@@ -197,8 +198,8 @@
   };
   input.oninput = () => { sync(); grow(); };
   row.oninput = () => { titleTouched = true; sync(); };
-  input.onkeydown = e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); if (!launch.hidden) launch.click(); } };
-  row.onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); if (cur === 'sub') { if (!launch.hidden) launch.click(); } else row.blur(); } };
+  // Enter в поле промта — перенос строки (по умолчанию); генерация запускается только кнопкой в шапке
+  row.onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); if (cur === 'sub') input.focus(); else row.blur(); } };   // Enter в верхней строке — к полю промта, без запуска
 
   // Запуск: промт — из белого поля (или из верхней строки, если белое пустое)
   launch.onclick = () => {

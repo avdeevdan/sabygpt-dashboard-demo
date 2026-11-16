@@ -59,6 +59,7 @@ button{font:inherit;border:0;background:none;cursor:pointer;color:inherit}
 .gpt__header button,.gpt__header input,.gpt__header a{cursor:pointer}
 .gpt__headR{display:flex;align-items:center;gap:12px}
 .gpt--wide{width:960px;height:676px}
+.gpt--wide[data-preset="1"]{height:622px}   /* у заготовки нет белого поля с промтом (46px + зазор 8px) — окно ниже на столько же, без «дырки» снизу */
 .gpt--wide .gpt__sub{flex:1;min-height:0}
 .gpt--wide .gen{margin:auto;padding-top:0}
 .gpt__headL{display:flex;align-items:center;gap:12px}
@@ -80,7 +81,16 @@ button{font:inherit;border:0;background:none;cursor:pointer;color:inherit}
 .gpt__icon{display:flex;align-items:center;justify-content:center;width:32px;height:32px;margin:0 -4px;flex:none;border-radius:var(--r-btn);color:var(--icon-secondary_icon-color,#656c87);cursor:pointer}
 .gpt__icon:hover{color:var(--icon-secondary_hover_icon-color,#1e5391)}
 .gpt__icon[hidden],.gpt__launch[hidden],.gpt__tool[hidden]{display:none}
-.gpt__body{background:#fff;border-radius:var(--r-s);padding:var(--o-s) 0;overflow:auto;min-height:0}
+.gpt__body{border-radius:var(--r-s);padding:var(--o-s) 0;overflow:auto;min-height:0;background-color:#fff;
+  /* тень у края прокрутки: снизу — пока есть что листать вниз, сверху — когда уже прокрутили; у «нижней точки» нижняя тень пропадает */
+  background-image:
+    linear-gradient(#fff 30%, #fff0), linear-gradient(#fff0, #fff 70%),
+    linear-gradient(#00000029, #0000), linear-gradient(#0000, #00000029);   /* равномерная тень от края до края */
+  background-position:0 0, 0 100%, 0 0, 0 100%;
+  background-size:100% 28px, 100% 28px, 100% 8px, 100% 8px;
+  background-repeat:no-repeat;
+  background-attachment:local, local, scroll, scroll}
+.gpt[data-view="list"]{max-height:430px}   /* общий список: окно не выше 430px, остальное — скролл */
 /* Элемент списка (11:373): статика / ховер с кнопками справа */
 .pitem{position:relative;display:flex;align-items:center;justify-content:space-between;height:30px;padding:0 6px 2px 12px;cursor:pointer;font-size:14px;color:#000}
 .pitem:hover{background:var(--background-hover_background-color,#f3f4f8)}
@@ -96,9 +106,8 @@ button{font:inherit;border:0;background:none;cursor:pointer;color:inherit}
 .pitem:not(.is-user) .pitem__b--del{display:none}
 .pitem.is-other{color:var(--text-unaccented_text-color,#999)}
 .pitem.is-other .pitem__acts{display:none}
-.gpt__sub{display:flex;flex-direction:column;gap:var(--o-s);animation:gptSub .18s ease-out}
+.gpt__sub{display:flex;flex-direction:column;gap:var(--o-s)}
 .gpt__sub[hidden]{display:none}
-@keyframes gptSub{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:none}}
 .gpt__body[hidden]{display:none}
 /* Кнопка запуска (Figma 19:14127): info-кнопка 24px, иконка EB1A; ховер/нажатие — варианты hover/press компонента */
 .gpt__launch{display:flex;align-items:center;justify-content:center;flex:none;width:24px;height:24px;padding-bottom:1px;border-radius:var(--r-btn);
