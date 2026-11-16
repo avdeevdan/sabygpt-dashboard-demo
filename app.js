@@ -3,7 +3,7 @@
   const win = $('gptScrim'), gpt = win.querySelector('.gpt'), btn = $('gptBtn');
   const input = $('promptInput'), row = $('rowInput'), launch = $('launchBtn');
   const IMGS = ['assets/result.png', 'assets/result2.png'];   // предпросмотры результата из Figma (варианты генерации чередуются)
-  let cur = 'list', timer = null, baseTop = null, entry = 'sabydoc';
+  let cur = 'list', timer = null, baseTop = null, entry = 'sabydoc'; let switching = false, sharedTop = null;
   const anchors = {};                                        // верх окна для каждой точки входа запоминается при первом открытии
   const CHIPS = ['Главные показатели компании', 'Для работы с клиентами', 'Для работы с сотрудниками и задачами', 'Товары и остатки'];
   const PH = { sabydoc: 'Например, нужен дашборд с отображением остатков товаров', v1: 'Опишите, какой дашборд вам нужен', v2: 'Опишите, какие виджеты вы хотите видеть на дашборде', v3: 'Опишите, какие виджеты вы хотите видеть на дашборде' };
@@ -103,10 +103,13 @@
     if (v !== 'sub') aborted = false;
     gpt.dataset.entry = entry; gpt.dataset.view = v;
     if (v !== 'list') document.querySelectorAll('.pitem.is-marked').forEach(n => n.classList.remove('is-marked'));
-    if (baseTop === null && !win.hidden && (v === 'list' || (v === 'sub' && entry !== 'sabydoc'))) {
-      if (anchors[entry] == null) {
-        // окно ввода стоит ровно по центру конструктора (отступ сверху = отступ снизу); при генерации верх остаётся на месте
-        anchors[entry] = Math.max(24, (entry === 'sabydoc' ? win.clientHeight / 2 : mid().y) - gpt.offsetHeight / 2);
+    if (baseTop === null && !win.hidden && (v === 'list' || (v === 'sub' && (entry !== 'sabydoc' || errMode)))) {
+      if (entry === 'sabydoc' && !errMode) {
+        if (anchors[entry] == null) anchors[entry] = Math.max(24, win.clientHeight / 2 - gpt.offsetHeight / 2);
+      } else {
+        // варианты пустого: при ручном открытии — свой центраж; при переключении из правой области верх у всех вариантов общий, чтобы окно не прыгало
+        anchors[entry] = (switching && sharedTop !== null) ? sharedTop : Math.max(24, (entry === 'sabydoc' ? win.clientHeight / 2 : mid().y) - gpt.offsetHeight / 2);
+        if (!switching || sharedTop === null) sharedTop = anchors[entry];
       }
       baseTop = Math.max(24, Math.min(anchors[entry], win.clientHeight - gpt.offsetHeight - 24));
     }
@@ -125,7 +128,7 @@
     renderVariant(); sync(); closePopups();
   };
   const sync = () => show(launch, cur === 'sub' && !!(input.value.trim() || row.value.trim()));
-  const grow = () => { input.style.height = 'auto'; input.style.height = Math.min(input.scrollHeight, 140) + 'px'; };
+  const grow = () => { input.style.height = 'auto'; input.style.height = Math.min(input.scrollHeight, 140) + 'px'; input.style.overflowY = input.scrollHeight > 140 ? 'auto' : 'hidden'; };   // скролл только когда текст не влезает в 140px
   const open = on => {
     show(win, on); btn.classList.toggle('is-open', on); closePopups();
     if (on) {
@@ -133,8 +136,8 @@
       dragX = 0; dragY = 0; applyDrag();   // при новом открытии окно снова по центру
       input.value = ''; row.value = ''; input.style.height = ''; baseTop = null; variants = []; vi = 0; titleTouched = false;
       if (entry === 'v2' || entry === 'v3') buildChips();
-      gpt.style.transition = 'none'; view(entry === 'sabydoc' ? 'list' : 'sub'); gpt.offsetHeight; gpt.style.transition = '';
-      if (entry !== 'sabydoc') input.focus();
+      gpt.style.transition = 'none'; view(entry === 'sabydoc' && !errMode ? 'list' : 'sub'); gpt.offsetHeight; gpt.style.transition = '';
+      if (entry !== 'sabydoc' || errMode) input.focus();
     } else clearTimeout(timer);
   };
   // Перетаскивание окна за шапку (кроме кнопок): сдвиг хранится отдельно от расчёта положения, поэтому окно остаётся там, куда его унесли
@@ -161,6 +164,13 @@
   });
 
   btn.onclick = () => open(win.hidden);
+  // маркер клика: область взаимодействия — 15px вокруг него; курсор внутри — маркер скрыт, вне — показан
+  const mark = btn.querySelector('.clickmark');
+  document.addEventListener('mousemove', ev => {
+    if (!mark || !win.hidden) return;
+    const r = mark.getBoundingClientRect(), pad = 15 * (r.width / 54 || 1);
+    mark.classList.toggle('is-near', ev.clientX >= r.left - pad && ev.clientX <= r.right + pad && ev.clientY >= r.top - pad && ev.clientY <= r.bottom + pad);
+  });
   $('gptClose').onclick = () => open(false);          // крестик: закрыть без сохранений
 
   // «назад»: из генерации/результата — к редактированию промта, из ввода — к списку
@@ -207,13 +217,13 @@
     const text = input.value.trim() || row.value.trim();
     run(text, titleTouched && row.value.trim() ? row.value.trim() : text);
   };
-  $('errEdit').onclick = () => { aborted = true; view('sub'); };   // «Измените» описание
+  $('errEdit').onclick = () => { aborted = true; view('sub'); grow(); input.focus(); const n = input.value.length; input.setSelectionRange(n, n); };   // «Измените» описание
   $('errRetry').onclick = () => generate();                       // «повторите» генерацию
   $('refreshBtn').onclick = () => generate();                       // «другой ответ» — новая генерация
   $('stopBtn').onclick = () => {
     clearTimeout(timer);
     if (variants.length) view('result');
-    else { presetMode = false; aborted = true; view('sub'); }   // область генерации уходит, окно остаётся на месте, промт — в кнопке справа от «назад»
+    else { presetMode = false; aborted = true; view('sub'); grow(); }   // область генерации уходит, окно остаётся на месте, промт — в кнопке справа от «назад»
   };
 
   function run(text, title) {
@@ -225,7 +235,7 @@
   function generate() {
     view('load');
     timer = setTimeout(() => {
-      if (errMode && !presetMode) { view('error'); return; }   // сценарий «с ошибкой»: свой промт — «виджеты не найдены»
+      if (errMode && !presetMode) { view('error'); return; }   // сценарий «с ошибкой»: свой промт — «виджеты не найдены», заготовки — успех
       variants.push({ src: IMGS[variants.length % IMGS.length], row: variants.length % IMGS.length });
       vi = variants.length - 1;
       view('result');
@@ -379,7 +389,7 @@ window.addEventListener('load', drawGrid);
       { group: 'Варианты пустого', items: [{ id: 'v1', title: 'Одно поле с подсказкой' }, { id: 'v2', title: 'Одно поле с чипсами' }, { id: 'v3', title: 'Одно поле с кнопками-ссылками' }] }
     ],
     value: { scenario: 'sabydoc' },
-    onChange: v => { errMode = v.scenario === 'sabydoc_err'; entry = errMode ? 'sabydoc' : v.scenario; if (!win.hidden) open(false); },   // точка входа в генерацию; открытое окно закрываем, чтобы оно открылось уже по новому сценарию
+    onChange: v => { errMode = v.scenario === 'sabydoc_err'; entry = errMode ? 'sabydoc' : v.scenario; if (!win.hidden) open(false); if (entry !== 'sabydoc' || errMode) { switching = true; open(true); switching = false; } },   // «Варианты пустого» показываем сразу с поднятым окном; остальные — окно закрыто, по клику на кнопку
     links: [{ title: 'Макет в Figma', href: 'https://www.figma.com/proto/WbLZOk7jbsIlxgK6OVO10b/%D0%93%D0%B5%D0%BD%D0%B5%D1%80%D0%B0%D1%86%D0%B8%D1%8F-%D0%B4%D0%B0%D1%88%D0%B1%D0%BE%D1%80%D0%B4%D0%BE%D0%B2?node-id=19-7988&p=f&t=AqKOkCHVLElFCeZT-8&scaling=min-zoom&content-scaling=fixed&page-id=0%3A1&starting-point-node-id=19%3A7988&hide-ui=1' }],
     team: [{ label: 'Design', name: 'Авдеев Даниил' }, { label: 'Develop' }]
   });

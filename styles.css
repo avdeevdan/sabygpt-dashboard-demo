@@ -65,10 +65,9 @@ button{font:inherit;border:0;background:none;cursor:pointer;color:inherit}
 .gpt__headL{display:flex;align-items:center;gap:12px}
 .gpt__variants{display:flex;align-items:center;gap:12px}
 .gpt__arrows{display:flex;align-items:center;gap:6px}
-.gpt__arrow{display:flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:var(--r-btn);background:var(--background-contrast-pale_color,#3333330d);color:var(--text-label_contrast_text-color,#656c87);cursor:pointer}
+.gpt__arrow{display:flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:var(--r-btn);background:var(--background-contrast-pale_color,#3333330d);color:var(--icon-label_icon-color,#8991a9);cursor:pointer}
 .gpt__arrow:hover:not(:disabled){background:#3333331a}
-.gpt__arrow--next svg{transform:rotate(180deg)}
-.gpt__arrow:disabled{background:none;box-shadow:inset 0 0 0 1px var(--border-readonly_border-color,#e4e4e4);color:#c3c7d3;cursor:default}
+.gpt__arrow:disabled{background:none;box-shadow:inset 0 0 0 1px var(--border-readonly_border-color,#e4e4e4);color:#ccc;cursor:default}
 .gpt__count{font-size:15px;letter-spacing:-.2115px;color:var(--text-label_contrast_text-color,#656c87);white-space:nowrap}
 .gpt__variants[hidden]{display:none}
 .gpt__model{display:flex;align-items:center;height:26px;padding:2px 0 0;color:var(--text-label_text-color,#8991a9);font-size:14px;cursor:pointer}
@@ -95,9 +94,9 @@ button{font:inherit;border:0;background:none;cursor:pointer;color:inherit}
 .pitem{position:relative;display:flex;align-items:center;justify-content:space-between;height:30px;padding:0 6px 2px 12px;cursor:pointer;font-size:14px;color:#000}
 .pitem:hover{background:var(--background-hover_background-color,#f3f4f8)}
 .pitem__t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pitem__acts{display:flex;align-items:center;gap:12px;opacity:0;flex:none}
+.pitem__acts{display:flex;align-items:center;gap:12px;opacity:0;flex:none;margin-bottom:-2px}   /* компенсирует нижний отступ строки — кнопки по центру */
 .pitem:hover .pitem__acts{opacity:1}
-.pitem__b{display:flex;align-items:center;justify-content:center;width:24px;height:24px;padding-bottom:2px;cursor:pointer}
+.pitem__b{display:flex;align-items:center;justify-content:center;width:24px;height:24px;cursor:pointer}
 .pitem__b .ic-16{color:var(--icon-unaccented_icon-color,#ccc)}
 .pitem__b:hover .ic-16{color:var(--icon-secondary_icon-color,#656c87)}
 .pitem.is-pinned .pitem__t{font-weight:600}
@@ -129,7 +128,7 @@ button{font:inherit;border:0;background:none;cursor:pointer;color:inherit}
 .gpt__rowtext::placeholder{color:var(--components-input-placeholder-color_inputtext,#8991a999);opacity:1}
 .gpt__box{background:#fff;border-radius:var(--r-s);padding:12px 8px}
 .gpt[data-preset="1"] .gpt__box{display:none}
-#promptInput{display:block;width:100%;border:0;outline:0;background:none;resize:none;font:inherit;font-size:15px;letter-spacing:-.2115px;line-height:18px;min-height:18px;max-height:140px;color:var(--text-text-color,#000);overflow:auto}
+#promptInput{display:block;width:100%;border:0;outline:0;background:none;resize:none;font:inherit;font-size:15px;letter-spacing:-.2115px;line-height:18px;min-height:18px;max-height:140px;color:var(--text-text-color,#000);overflow:hidden}
 #promptInput::placeholder{color:var(--components-input-placeholder-color_inputtext,#8991a999);opacity:1}
 /* Генерация (Figma 23:15364) */
 .gen{display:flex;flex-direction:column;align-items:center;gap:12px;width:227px;margin:0 auto;padding:42px 0 24px}
@@ -200,6 +199,13 @@ button{font:inherit;border:0;background:none;cursor:pointer;color:inherit}
   background:radial-gradient(ellipse 13px 10px at 50% 50%,#c0cdff 0,#ded7ff 54.5%,#f8f8f800 100%)}
 .btn-gpt:hover{background:radial-gradient(ellipse 13px 10px at 50% 50%,#c0cdff 0,#ded7ff 54.5%,#f8f8f800 100%),linear-gradient(rgba(51,51,51,.05),rgba(51,51,51,.05))}
 .btn-gpt.is-open{box-shadow:none}
+/* маркер клика (макет Figma 19:1197, «большой»): виден, пока окно SabyGPT закрыто; стоит чуть левее кнопки, остриё курсора смотрит на неё */
+.btn-gpt{position:relative}
+.clickmark{position:absolute;left:4px;top:13px;width:54px;height:54px;pointer-events:none;z-index:1000}
+.clickmark::before{content:"";position:absolute;inset:0 6.75px 6.75px 0;border-radius:32px;background:#6cc;opacity:.5}
+.clickmark svg{position:absolute;left:30px;top:30px}
+.btn-gpt.is-open .clickmark{display:none}
+.clickmark.is-near{visibility:hidden}
 /* Сохранение и закрытие: между кнопками 14 px (6 gap + 8), между группами 12 px */
 .btn-done{margin-left:6px}
 .btn-close{margin-left:8px}
