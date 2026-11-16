@@ -60,6 +60,13 @@
     return it;
   }
   PRESETS.forEach(p => addItem(p));
+  // пункт истории для своего промта (без дублей); клик по нему из списка запускает генерацию
+  function addUserItem() {
+    const title = row.value.trim() || input.value.trim();
+    if (!title) return;
+    const dup = [...document.querySelectorAll('#presets .pitem.is-user .pitem__t')].some(n => n.textContent === title);
+    if (!dup) addItem({ text: title, prompt: input.value.trim(), user: true });
+  }
 
   // Чипсы (вариант 2) / кнопки-ссылки (вариант 3): клик ставит текст в поле, в шапке появляется кнопка запуска
   function buildChips() {
@@ -157,10 +164,7 @@
   $('gptClose').onclick = () => open(false);          // крестик: закрыть без сохранений
 
   // «назад»: из генерации/результата — к редактированию промта, из ввода — к списку
-  $('rowBtn').onclick = () => {
-    if (aborted) { aborted = false; view('sub'); row.focus(); }   // после «Прервать» клик по строке возвращает её к редактированию
-    else $('backBtn').click();
-  };
+  $('rowBtn').onclick = () => $('backBtn').click();   // кнопка с текстом промта = «назад» (и после «Прервать»: промт уходит в общий список)
   // меню параметров: попап встаёт так, что его крестик (центр на правом краю попапа, 22px от верха) совпадает с кнопкой-вызывателем
   $('menuBtn').onclick = e => {
     e.stopPropagation();
@@ -181,7 +185,10 @@
     if (n.dataset.menu === 'pin' && curItem) curItem.toggle();   // то же, что скрепка в общем списке
   });
   $('backBtn').onclick = () => {
-    if (cur === 'sub') view('list');
+    if (cur === 'sub') {
+      if (aborted && entry === 'sabydoc') addUserItem();   // прерванный промт попадает в общий список как «сгенерированный» вариант
+      view('list');
+    }
     else if (presetMode) {           // из заготовки возвращаемся в общий список, а не в свой промт
       clearTimeout(timer); presetMode = false; input.value = ''; row.value = ''; input.style.height = ''; titleTouched = false; variants = []; vi = 0;
       baseTop = parseFloat(gpt.style.marginTop) || baseTop;   // окно остаётся на той же высоте, что и после генерации; при новом открытии снова центрируется
@@ -296,9 +303,7 @@
     const rowEl = buildRow(ROWS[variants[vi].row]);
     $('insertedGrid').append(rowEl);
     applied.push(rowEl); redone.length = 0; syncUndo();
-    const title = row.value.trim() || input.value.trim();
-    const dup = [...document.querySelectorAll('#presets .pitem.is-user .pitem__t')].some(n => n.textContent === title);
-    if (!dup && entry === 'sabydoc') addItem({ text: title, prompt: input.value.trim(), user: true });
+    if (entry === 'sabydoc') addUserItem();
     open(false);
     toBottom();
   };
