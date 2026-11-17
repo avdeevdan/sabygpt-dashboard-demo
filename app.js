@@ -292,12 +292,15 @@
   $('redoBtn').onclick = () => { const el = redone.pop(); if (!el) return; $('insertedGrid').append(el); applied.push(el); syncUndo(); requestAnimationFrame(drawGrid); toBottom(); };
 
   // Сброс (третья кнопка): одним кликом возвращает дашборд к состоянию до любых генераций (вместо многих «Отменить»); после сброса серая, как и пока генераций не было
+  const clearDash = behavior => {
+    $('insertedGrid').innerHTML = '';
+    applied.length = 0; redone.length = 0; syncUndo();
+    $('currentGrid').scrollTo({ top: 0, behavior });
+  };
   const doReset = () => {
     if (!applied.length) return;
     if (!win.hidden) open(false);
-    $('insertedGrid').innerHTML = '';
-    applied.length = 0; redone.length = 0; syncUndo();
-    $('currentGrid').scrollTo({ top: 0, behavior: 'smooth' });
+    clearDash('smooth');
   };
   // клик по кнопке сброса поднимает меню «Сбросить изменения»; любой пункт возвращает дашборд в стартовое состояние
   $('resetBtn').onclick = e => {
@@ -376,6 +379,7 @@ window.addEventListener('load', drawGrid);
   DemoFrame.mount({
     stage: document.getElementById('stage'),
     top: 4,
+    fixedScale: 1,   // демо всегда в натуральную величину: сцена 1600×900, панель 300 — одинаково в любом браузере
     onScale: (k) => {
       demoScale = k;
       // сдвиг сцены — в целые физические пиксели: на дробной позиции слой размазывается между пикселями и тонкие линии теряют чёткость
@@ -389,7 +393,7 @@ window.addEventListener('load', drawGrid);
       { group: 'Варианты пустого', items: [{ id: 'v1', title: 'Одно поле с подсказкой' }, { id: 'v2', title: 'Одно поле с чипсами' }, { id: 'v3', title: 'Одно поле с кнопками-ссылками' }] }
     ],
     value: { scenario: 'sabydoc' },
-    onChange: v => { errMode = v.scenario === 'sabydoc_err'; entry = errMode ? 'sabydoc' : v.scenario; if (!win.hidden) open(false); if (entry !== 'sabydoc' || errMode) { switching = true; open(true); switching = false; } },   // «Варианты пустого» показываем сразу с поднятым окном; остальные — окно закрыто, по клику на кнопку
+    onChange: v => { if (applied.length) clearDash('auto'); errMode = v.scenario === 'sabydoc_err'; entry = errMode ? 'sabydoc' : v.scenario; if (!win.hidden) open(false); if (entry !== 'sabydoc' || errMode) { switching = true; open(true); switching = false; } },   // «Варианты пустого» показываем сразу с поднятым окном; остальные — окно закрыто, по клику на кнопку
     links: [{ title: 'Макет в Figma', href: 'https://www.figma.com/proto/WbLZOk7jbsIlxgK6OVO10b/%D0%93%D0%B5%D0%BD%D0%B5%D1%80%D0%B0%D1%86%D0%B8%D1%8F-%D0%B4%D0%B0%D1%88%D0%B1%D0%BE%D1%80%D0%B4%D0%BE%D0%B2?node-id=19-7988&p=f&t=AqKOkCHVLElFCeZT-8&scaling=min-zoom&content-scaling=fixed&page-id=0%3A1&starting-point-node-id=19%3A7988&hide-ui=1' }],
     team: [{ label: 'Design', name: 'Авдеев Даниил' }, { label: 'Develop' }]
   });

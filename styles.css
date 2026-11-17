@@ -9,7 +9,8 @@
   font-family:Inter,system-ui,sans-serif; font-size:14px; letter-spacing:-.1974px;
 }
 *{box-sizing:border-box;margin:0}
-html,body{height:100%;background:#fff;overflow:hidden}
+html,body{background:#fff;min-height:100%}
+html{overflow:auto}   /* масштаб демо фиксирован (1:1): если окно меньше 1920×984, страница прокручивается */
 button{font:inherit;border:0;background:none;cursor:pointer;color:inherit}
 /* Сцена 1600x900: позицию и масштаб под окно задаёт demo-frame (панель сценариев справа) */
 .stage{position:absolute;left:0;top:0;width:1600px;height:900px;overflow:hidden;border-radius:var(--r-s);background:var(--constructor-bg)}
@@ -288,3 +289,4 @@ button{font:inherit;border:0;background:none;cursor:pointer;color:inherit}
 
 /* Маркер у только что закреплённого пункта (Figma 376:8728): пропадает, как только уходим из списка: 3x16, radius 4, extra/marker_color, слева по центру */
 .pitem.is-marked::before{content:"";position:absolute;left:0;top:50%;width:3px;height:16px;margin-top:-8px;border-radius:var(--border-radius-border-radius_2xs,4px);background:var(--extra-marker_color,#cc3d00)}
+.btn-done .ic{transform:translate(-1.9px,-.4px)}   /* глиф галки смещён вправо внутри шрифта — центрируем по оптическому центру */

@@ -192,7 +192,7 @@
       const vw = (vp ? vp.clientWidth : document.documentElement.clientWidth) - o.left;
       const vh = (vp ? vp.clientHeight : document.documentElement.clientHeight) - o.top;
       const headH = o.head ? o.headHeight : 0;
-      scale = Math.max(0.1, Math.min(vw / (o.width + o.gap + o.panelWidth), vh / (headH + o.height)));
+      scale = o.fixedScale || Math.max(0.1, Math.min(vw / (o.width + o.gap + o.panelWidth), vh / (headH + o.height)));   // fixedScale: фиксированный масштаб (1 = 1:1), при маленьком окне страница прокручивается
       const y = o.top + headH * scale;
       if (head) head.style.transform = `translate(0px, ${o.top}px) scale(${scale})`;
       stage.style.transform = `translate(${o.left}px, ${y}px) scale(${scale})`;
