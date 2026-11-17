@@ -52,7 +52,7 @@
     it.querySelector('.pitem__b--del').onclick = e => { e.stopPropagation(); items.splice(items.indexOf(o), 1); it.remove(); };
     it.onclick = () => {
       if (p.other) { presetMode = false; input.value = ''; row.value = ''; titleTouched = false; view('sub'); input.focus(); }
-      else { presetMode = true; curItem = o; run(p.prompt || p.text, p.text); }
+      else { presetMode = !p.user; curItem = o; run(p.prompt || p.text, p.text); }   // свой (ранее введённый) промт открывается как свой: с полем ввода, а не кнопкой
     };
     const at = items.findIndex(i => i.other);
     if (at >= 0 && !p.other) items.splice(at, 0, o); else items.push(o);
