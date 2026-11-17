@@ -68,6 +68,28 @@
     if (!dup) addItem({ text: title, prompt: input.value.trim(), user: true });
   }
 
+  // Подсказки промта: клик по пустому полю (плейсхолдеру) подставляет правдоподобный промт; каждый следующий клик меняет его на другой (случайный порядок).
+  // Как только текст правят руками — клики работают как обычно, введённое не трогаем.
+  const SUGGEST = [
+    'Собери дашборд для руководителя отдела продаж: выручка, воронка и план/факт',
+    'Нужен дашборд с отображением остатков товаров на складах',
+    'Покажи ключевые показатели по клиентам и дебиторской задолженности',
+    'Добавь виджеты с задачами сотрудников и просроченными документами'
+  ];
+  let sugQueue = [], lastSug = '';
+  const nextSuggest = () => {
+    if (!sugQueue.length) {
+      sugQueue = SUGGEST.slice().sort(() => Math.random() - .5);
+      if (sugQueue[0] === lastSug) sugQueue.push(sugQueue.shift());   // на стыке кругов не повторяем один и тот же
+    }
+    return (lastSug = sugQueue.shift());
+  };
+  input.addEventListener('click', () => {
+    if (input.readOnly || !(input.value === '' || input.value === lastSug)) return;
+    input.value = nextSuggest(); grow(); sync();
+    input.focus(); input.setSelectionRange(input.value.length, input.value.length);
+  });
+
   // Чипсы (вариант 2) / кнопки-ссылки (вариант 3): клик ставит текст в поле, в шапке появляется кнопка запуска
   function buildChips() {
     const box = $('chips'), links = entry === 'v3';
