@@ -115,7 +115,8 @@
     }
     // в вариантах пустого окно центрируется по конструктору целиком (центр сцены), а не по дашборду
     gpt.style.left = entry === 'sabydoc' ? '' : (mid().x - win.clientWidth / 2) + 'px';
-    gpt.style.marginTop = (wide ? Math.max(24, (entry === 'sabydoc' ? win.clientHeight / 2 : mid().y) - gpt.offsetHeight / 2) : baseTop) + 'px';
+    // верх окна фиксирован и равен верху окна с результатом (676px; в вариантах пустого — 644px): окно не прыгает по вертикали ни при первом входе, ни при результате
+    gpt.style.marginTop = Math.max(24, (entry === 'sabydoc' ? win.clientHeight / 2 : mid().y) - (entry === 'sabydoc' ? 676 : 644) / 2) + 'px';
     input.readOnly = v === 'load' || v === 'result' || v === 'error';
 
     row.readOnly = v === 'load';
@@ -310,7 +311,7 @@
   };
   $('resetPopupX').onclick = e => { e.stopPropagation(); closePopups(); };
   $('resetPopup').onclick = e => e.stopPropagation();
-  document.querySelectorAll('#resetPopup [data-reset]').forEach(n => n.onclick = e => { e.stopPropagation(); closePopups(); doReset(); });
+  // пункты меню «Сбросить изменения» пока некликабельны (поведение не проработано) — см. стиль #resetPopup .mitem
 
   // Зелёная галка: вставляем показанный вариант вниз текущего дашборда, промт уходит в историю под названием из верхней строки
   $('doneBtn').onclick = () => {

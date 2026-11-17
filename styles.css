@@ -52,7 +52,7 @@ button{font:inherit;border:0;background:none;cursor:pointer;color:inherit}
 /* Окно SabyGPT (Figma 270:5288), элементы списка (11:373), попап выбора модели (19:15110) */
 .gpt-scrim{position:absolute;inset:0;z-index:10;display:flex;align-items:flex-start;justify-content:center;background:none;border-radius:inherit}
 .gpt-scrim[hidden]{display:none}
-.gpt{position:relative;width:550px;margin-top:0;transition:width .2s ease,margin-top .25s ease;max-height:calc(100% - 48px);display:flex;flex-direction:column;padding:0 var(--o-m) var(--o-m);border-radius:var(--border-radius-border-radius_s,8px);
+.gpt{position:relative;width:960px;margin-top:0;transition:width .2s ease,margin-top .25s ease;max-height:calc(100% - 48px);display:flex;flex-direction:column;padding:0 var(--o-m) var(--o-m);border-radius:var(--border-radius-border-radius_s,8px);
   background:var(--components-constructor-simplifiedconstructor_background-color,#eceaf5);
   box-shadow:0 0 46px #0000001f,0 0 15px #0000001f}
 .gpt__header{display:flex;align-items:center;justify-content:space-between;padding:var(--o-xs) 0;flex:none;cursor:grab;touch-action:none;user-select:none}
@@ -290,3 +290,5 @@ button{font:inherit;border:0;background:none;cursor:pointer;color:inherit}
 /* Маркер у только что закреплённого пункта (Figma 376:8728): пропадает, как только уходим из списка: 3x16, radius 4, extra/marker_color, слева по центру */
 .pitem.is-marked::before{content:"";position:absolute;left:0;top:50%;width:3px;height:16px;margin-top:-8px;border-radius:var(--border-radius-border-radius_2xs,4px);background:var(--extra-marker_color,#cc3d00)}
 .btn-done .ic{transform:translate(-1.9px,-.4px)}   /* глиф галки смещён вправо внутри шрифта — центрируем по оптическому центру */
+
+#resetPopup .mitem{cursor:default}   /* пункты сброса: ховер есть, клик ничего не делает */
