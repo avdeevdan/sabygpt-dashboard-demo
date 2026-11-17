@@ -277,7 +277,7 @@ button{font:inherit;border:0;background:none;cursor:pointer;color:inherit}
 .popup__hx:hover{color:var(--icon-secondary_hover_icon-color,#313e78)}
 
 /* Заготовленный промт: строка справа от «назад» — обычная кнопка (16px, text-color → hover_text-color, без подчёркивания) */
-.gpt__rowbtn{flex:1;min-width:0;height:30px;margin:-3px 0;display:none;align-items:center;padding:0 0 4px;text-align:left;font-size:16px;letter-spacing:-.2256px;line-height:22px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text-text-color,#000);cursor:pointer}
+.gpt__rowbtn{flex:1;min-width:0;height:30px;margin:-3px 0;display:none;align-items:center;padding:0 0 1px;text-align:left;font-size:16px;letter-spacing:-.2256px;line-height:22px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text-text-color,#000);cursor:pointer}
 .gpt__rowbtn:hover,.gpt__rowbtn:active{color:var(--text-hover_text-color,#575757)}
 .gpt[data-rowbtn="1"] .gpt__rowbtn{display:block}
 .gpt[data-rowbtn="1"] .gpt__rowtext{display:none}
