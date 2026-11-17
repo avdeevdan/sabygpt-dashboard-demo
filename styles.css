@@ -192,8 +192,9 @@ button{font:inherit;border:0;background:none;cursor:pointer;color:inherit}
 .env-side__nav{display:flex;flex-direction:column;align-items:center;gap:var(--o-3xs)}
 .env-side__i{display:flex;padding:var(--o-m);border-radius:var(--r-s);color:var(--icon);cursor:pointer}
 .env-side__i--primary{color:#db4200}
-.env-side__i:hover{background:#fff}
-.env-help{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:16px;background:var(--info-bg);border:1px solid var(--info-bg-active);color:#5a49ab;font-size:20px;font-weight:600}
+.env-side__i:hover{background:var(--navigation-hover_background-color,#f9f9f9)}
+.env-help{display:flex;align-items:center;justify-content:center;box-sizing:border-box;width:30px;height:30px;border-radius:26px;background:var(--background-same-info_same_background-color,#eeebff);border:1px solid var(--background-same-info_active_same_background-color,#d4ccff);color:var(--icon-info_icon-color,#5a49ab);font-size:20px;font-weight:500;cursor:pointer}
+.env-help:hover{background:var(--background-same-info_hover_same_background-color,#e1dbff)}
 
 /* SabyGPT: градиент и иконка из макета (узел 58:5628 / hover 58:5627) */
 .btn-gpt{width:32px;height:32px;border-radius:var(--r-btn);display:grid;place-items:center;
@@ -289,6 +290,21 @@ button{font:inherit;border:0;background:none;cursor:pointer;color:inherit}
 
 /* Маркер у только что закреплённого пункта (Figma 376:8728): пропадает, как только уходим из списка: 3x16, radius 4, extra/marker_color, слева по центру */
 .pitem.is-marked::before{content:"";position:absolute;left:0;top:50%;width:3px;height:16px;margin-top:-8px;border-radius:var(--border-radius-border-radius_2xs,4px);background:var(--extra-marker_color,#cc3d00)}
-.btn-done .ic{transform:translate(-1.9px,-.4px)}   /* глиф галки смещён вправо внутри шрифта — центрируем по оптическому центру */
+
 
 #resetPopup .mitem{cursor:default}   /* пункты сброса: ховер есть, клик ничего не делает */
+
+/* «три точки» в правом сайдбаре: свой ховер — иконка @secondary_icon-color, круглая подложка @pale-color */
+.env-side__i--more{width:32px;height:32px;padding:0;margin:calc(var(--offset-offset_st,10px) - 2px) 0 0;align-items:center;justify-content:center}   /* кнопка 32px; отступ сверху offset_st (10px) от кнопки выше, с учётом gap колонки 2px */
+.env-side__i--more{color:var(--icon-secondary_icon-color,#656c87)}
+.env-side__i--more:hover{background:var(--background-contrast-pale_color,#3333330d);color:var(--icon-secondary_hover_icon-color,#1e5391);border-radius:var(--r-btn)}
+/* кнопка «Сворачивание» (макет 390:8113): появляется под кнопкой «три точки» при наведении на правый тулбар; по клику ничего не делает */
+.env-side__fold{display:flex;align-items:center;justify-content:center;width:32px;height:32px;margin-top:calc(var(--offset-offset_m,12px) - 2px);border:1px solid transparent;border-radius:var(--r-btn);background:var(--background-contrast-pale_color,#3333330d);color:var(--icon);opacity:0;pointer-events:none;transition:opacity .15s}
+.env-side:hover .env-side__fold{opacity:1;pointer-events:auto;cursor:default}
+.env-side__fold:hover{border-color:var(--border-hover_border-color,#d0d0d0)}
+.env-side__fold .g{width:24px;height:24px;padding-bottom:0;font-size:15px}   /* слот иконки 24×24 (icon-size_m); глиф в cbuc-icons крупнее, чем в макете (8×11px), поэтому кегль 15 */
+/* зелёная кнопка «Сохранить»: ховер @success_hover_color */
+.btn-done:hover{background:var(--background-contrast-success_hover_color,#128c29)}
+/* переключатель устройств в шапке: кнопки 38×20, радиус 100; в покое иконка @label_contrast_text-color, по ховеру подложка @pale-color и иконка @text-color */
+.tumbler__item{width:38px;height:20px;padding:0;justify-content:center;color:var(--text-label_contrast_text-color,#656c87);cursor:pointer}
+.tumbler__item:not(.is-active):hover{background:var(--background-contrast-pale_color,#3333330d);color:var(--text-text-color,#000)}
